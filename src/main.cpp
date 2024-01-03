@@ -241,27 +241,27 @@ void preloadAuton(){
 }
 
 void defensiveAuton(){
-  // drive into matchload bar
-  driveForward(150);
-  leftWing.set(true);
-  wait(0.2,seconds);
-  // get triball out of matchload zone
-  turnRight(180);
-  wait(0.2,seconds);
-  leftWing.set(false);
-  turnLeft(60);
-  // push preload into goal
-  driveForward(150);
-  intakeMotor.spin(forward);
-  driveForward(150);
-  wait(0.2,seconds);
-  // turn around and touch elevation bar
-  driveReverse(50);
-  turnRight(210);
-  wait(0.2,seconds);
-  driveForward(200);
-  turnRight(45);
-  driveForward(200);
+  // // drive into matchload bar
+  // driveForward(150);
+  // leftWing.set(true);
+  // wait(0.2,seconds);
+  // // get triball out of matchload zone
+  // turnRight(180);
+  // wait(0.2,seconds);
+  // leftWing.set(false);
+  // turnLeft(60);
+  // // push preload into goal
+  // driveForward(150);
+  // intakeMotor.spin(forward);
+  // driveForward(150);
+  // wait(0.2,seconds);
+  // // turn around and touch elevation bar
+  // driveReverse(50);
+  // turnRight(210);
+  // wait(0.2,seconds);
+  // driveForward(200);
+  // turnRight(45);
+  // driveForward(200);
 
   // at the end of auton
   leftFrontMotor.setStopping(coast);
@@ -272,28 +272,28 @@ void defensiveAuton(){
   rightTopMotor.setStopping(coast);
 }
 void offensiveAuton() {
-  driveForward(500);
-  wait(0.2,seconds);
-  turnRight(90);
-  wait(0.2,seconds);
-  // score alliance triball
-  intakeMotor.spin(reverse,100,pct); 
-  driveForward(150);
-  wait(0.2,seconds);
-  intakeMotor.stop();
-  driveReverse(300);
-  turnLeft(45);
-  // pick up triball
-  intakeMotor.spin(forward,100,pct);
-  driveForward(150); 
-  wait(0.2, seconds);
-  intakeMotor.stop();
-  turnRight(45);
-  wait(0.2, seconds);
-  //push triball out
-  intakeMotor.spin(reverse,100,pct);
-  driveForward(200);
-  driveReverse(300);
+  // driveForward(500);
+  // wait(0.2,seconds);
+  // turnRight(90);
+  // wait(0.2,seconds);
+  // // score alliance triball
+  // intakeMotor.spin(reverse,100,pct); 
+  // driveForward(150);
+  // wait(0.2,seconds);
+  // intakeMotor.stop();
+  // driveReverse(300);
+  // turnLeft(45);
+  // // pick up triball
+  // intakeMotor.spin(forward,100,pct);
+  // driveForward(150); 
+  // wait(0.2, seconds);
+  // intakeMotor.stop();
+  // turnRight(45);
+  // wait(0.2, seconds);
+  // //push triball out
+  // intakeMotor.spin(reverse,100,pct);
+  // driveForward(200);
+  // driveReverse(300);
 
   // at the end of auton
   leftFrontMotor.setStopping(coast);
@@ -353,10 +353,6 @@ void skillsAuton() {
   wait(40,seconds);
 
   cataMotor.stop();
-
-  
-
-
 
 }
 
