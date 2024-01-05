@@ -170,7 +170,84 @@ void turnRight(int target, int driveSpeed=50) {
 
     driveStop();
 }
+void turnLeftFUpdated(int target) {   
+    
+    InertialA.resetRotation();
+    wait(.25, sec); //Let em' get used to stuff 
+    
+    double change_point = 45; 
+    double fast_speed = 50;
+    double slow_speed = 5;
 
+    while(InertialA.rotation(degrees) > target/3) {
+        int speed = fast_speed;  
+
+        /*leftTopMotor.spin(fwd, speed, pct);
+        rightTopMotor.spin(reverse, speed, pct);
+        leftFrontMotor.spin(reverse, speed, pct);
+        rightFrontMotor.spin(fwd, speed, pct); */
+        leftBackMotor.spin(reverse, speed, pct);
+        rightBackMotor.spin(fwd, speed, pct);
+    }
+
+    while(InertialA.rotation(degrees) < target/3) {
+        int speed = slow_speed;  
+
+      /*  leftTopMotor.spin(fwd, speed, pct);
+        rightTopMotor.spin(reverse, speed, pct);
+        leftFrontMotor.spin(reverse, speed, pct);
+        rightFrontMotor.spin(fwd, speed, pct); */
+        leftBackMotor.spin(reverse, speed, pct);
+        rightBackMotor.spin(fwd, speed, pct);
+    }
+
+
+    /*leftTopMotor.stop();
+    rightTopMotor.stop();
+    leftFrontMotor.stop();
+    rightFrontMotor.stop(); */
+    leftBackMotor.stop();
+    rightBackMotor.stop();  
+}
+
+void turnRightF(int target) {   
+    
+    InertialA.resetRotation();
+    wait(.25, sec); //Let 'em settle...
+    
+    double change_point = 45; 
+    double fast_speed = 50;
+    double slow_speed = 5;
+    int speed = 50;
+    while (InertialA.rotation(degrees) < target/2) { 
+        speed = fast_speed;  
+
+
+        /*leftTopMotor.spin(reverse, speed, pct);
+        rightTopMotor.spin(fwd, speed, pct);
+        leftFrontMotor.spin(fwd, speed, pct);    
+        rightFrontMotor.spin(reverse, speed, pct); */
+        leftBackMotor.spin(fwd, speed, pct);
+        rightBackMotor.spin(fwd, speed, pct);
+    }
+
+    while (InertialA.rotation(degrees) > target/2 ) { 
+        speed = slow_speed;  
+
+      /*  leftTopMotor.spin(reverse, speed, pct);
+        rightTopMotor.spin(fwd, speed, pct);
+        leftFrontMotor.spin(fwd, speed, pct);
+        rightFrontMotor.spin(reverse, speed, pct); */ 
+        leftBackMotor.spin(fwd, speed, pct);
+        rightBackMotor.spin(fwd, speed, pct); 
+    }
+    /*leftTopMotor.stop();
+    rightTopMotor.stop();
+    leftFrontMotor.stop();
+    rightFrontMotor.stop(); */
+    leftBackMotor.stop();
+    rightBackMotor.stop();
+}
 void controllerDisplay(){
   while(true){
     Controller1.Screen.clearScreen();
@@ -184,7 +261,12 @@ void controllerDisplay(){
     this_thread::sleep_for(50);
   }
 }
-
+void inertialBrainUpdate() {
+  while(true) {
+    Brain.Screen.printAt(1,120, "Inertial Heading: %f",InertialA.heading(degrees));
+    this_thread::sleep_for(50);
+  }
+}
 void initialize() {
     leftWing.set(false);
     rightWing.set(false);
@@ -316,35 +398,33 @@ void skillsAuton() {
   intakeMotor.spinFor(100,degrees);
 
   // go forward, turn to position bar
-  driveForward(200,50);
+//  driveForward(200,50); UNCOMMENT IN REAL CODE (((((((((((((99(((((((((())))))))))))))))))))))
 
   wait(0.5, seconds);
 
   // turn right for one second
-  leftBackMotor.spin(reverse);
-  leftFrontMotor.spin(reverse);
+  turnRightF(90);
 
   wait(1,seconds);
-
+/*
   leftBackMotor.stop();
-  leftFrontMotor.stop();
+  leftFrontMotor.stop(); UNCOMMENT IN REAL CODE (((((((((((((((((((((((())))))))))))))))))))))))
 
   // go next to bar
   driveForward(100, 50);
 
   wait(1,seconds);
-
+*/
   // turn left while touching bar (to straighten up)
 
-  leftBackMotor.spin(forward);
-  leftFrontMotor.spin(forward);
+  turnLeftFUpdated(90);
 
   wait(1.5,seconds);
-
+/*
   leftBackMotor.stop();
   leftFrontMotor.stop();
   
-  wait(1, seconds);
+  wait(1, seconds); UNCOMMENT IN REAL CODE ((((((((((((((((((()))))))))))))))))))
 
   // shoot for 40 seconds
 
@@ -353,7 +433,7 @@ void skillsAuton() {
   wait(40,seconds);
 
   cataMotor.stop();
-
+*/
 }
 
 int AutonSelected = 0;
@@ -397,50 +477,55 @@ void selectAuton() {
   // get click position
   int x = Brain.Screen.xPosition(); 
   int y = Brain.Screen.yPosition();
+  bool autonSelected = false;
 
   // go button clicked
-  if (x >= 320 && x <= 420 && y >= 50 && y <= 150) {
-    Brain.Screen.printAt(1, 200, "Auton Chosen =  %d                             ", AutonSelected);
-    Brain.Screen.clearScreen();
+  if (autonSelected == false) {
+    if (x >= 320 && x <= 420 && y >= 50 && y <= 150) {
+      autonSelected = true;
+      Brain.Screen.printAt(1, 200, "Auton Chosen =  %d                             ", AutonSelected);
+      Brain.Screen.clearScreen();
 
-    Brain.Screen.printAt(1,40, "--------4610M--------                              ");
+      Brain.Screen.printAt(1,40, "--------4610M--------                              ");
 
-    Brain.Screen.printAt(1,120, "Inertial Heading: %f",InertialA.heading(degrees));
+      thread t1(inertialBrainUpdate);
 
-    Brain.Screen.printAt(1, 200, "Auton Selected =  %d   ", AutonSelected);
+      Brain.Screen.printAt(1, 200, "Auton Selected =  %d   ", AutonSelected);
 
-    switch (AutonSelected)  {
-      case 0:
-        Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal                              ");
-        break;
-      case 1:
-        Brain.Screen.printAt(1, 225, "Auton Description: Offensive Auton: Score ________                              ");
-        break;
-      case 2:
-        Brain.Screen.printAt(1, 225, "Auton Description: Defensive Auton: Score ________                              ");
-        break;
-      case 3:
-        Brain.Screen.printAt(1, 225, "Auton Description: Skills auton                              ");
-        break;
-      default:
-        Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal                              ");
+      switch (AutonSelected)  {
+        case 0:
+          Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal                              ");
+          break;
+        case 1:
+          Brain.Screen.printAt(1, 225, "Auton Description: Offensive Auton: Score ________                              ");
+          break;
+        case 2:
+          Brain.Screen.printAt(1, 225, "Auton Description: Defensive Auton: Score ________                              ");
+          break;
+        case 3:
+          Brain.Screen.printAt(1, 225, "Auton Description: Skills auton                              ");
+          break;
+        default:
+          Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal                              ");
+      }
     }
-  }
 
-  // prev button clicked
-  else if (x >= 20 && x <= 120 && y >= 50 && y <= 150) {
-    AutonSelected--;
-    if (AutonSelected < AutonMin) {
-      AutonSelected = AutonMax; 
+    // prev button clicked
+    else if (x >= 20 && x <= 120 && y >= 50 && y <= 150) {
+      AutonSelected--;
+      if (AutonSelected < AutonMin) {
+        AutonSelected = AutonMax; 
+      }
     }
+    // next button clicked
+    else if (x >= 170 && x <= 270 && y >= 50 && y <= 150) {
+      AutonSelected++;
+      if (AutonSelected > AutonMax) {
+        AutonSelected = AutonMin; 
+      }  
   }
-  // next button clicked
-  else if (x >= 170 && x <= 270 && y >= 50 && y <= 150) {
-    AutonSelected++;
-    if (AutonSelected > AutonMax) {
-      AutonSelected = AutonMin; 
-    }  
   }  
+  
   
   //print description of auton selected
   Brain.Screen.printAt(1, 200, "Auton Selected =  %d   ", AutonSelected);
@@ -462,10 +547,6 @@ void selectAuton() {
   }
 }
 
-// void drawPostAutonSelect() {
-  
-  
-// }
 /*---------------------------------------------------------------------------*/
 /*                          Pre-Autonomous Functions                         */
 /*                                                                           */
@@ -482,7 +563,7 @@ void pre_auton(void) {
   // Example: clearing encoders, setting servo positions, ...
 
   initialize();
-
+  wait (3, sec);
   drawAutonSelector2();
 
   Brain.Screen.pressed(selectAuton);
@@ -561,8 +642,12 @@ int main() {
 
   // Run the pre-autonomous function.
   pre_auton();
+  //Skills, testing the turns that I (calv) updated
+  skillsAuton();
   // Prevent main from exiting with an infinite loop.
+  
   while (true) {
     wait(100, msec);
+
   }
 }
