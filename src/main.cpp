@@ -91,7 +91,7 @@ int wingVar = 0;
 void wings () {
   if (Controller1.ButtonX.pressing()) {
     wingVar += 1;
-    wait(10,msec);
+    wait(20,msec);
   }
   if (wingVar%2 == 1) {
     leftWing.set(true);
@@ -252,10 +252,12 @@ void controllerDisplay(){
   while(true){
     Controller1.Screen.clearScreen();
     Controller1.Screen.setCursor(1,1);
-    Controller1.Screen.print("InertialA Rot: %f",InertialA.rotation(degrees));
+    Controller1.Screen.print("Auton Selected =  %s   ", AutonSelected);
     Controller1.Screen.setCursor(2,1);
-    Controller1.Screen.print("InertialA Head: %f",InertialA.heading(degrees));
+    Controller1.Screen.print("InertialA Rot: %f",InertialA.rotation(degrees));
     Controller1.Screen.setCursor(3,1);
+    Controller1.Screen.print("InertialA Head: %f",InertialA.heading(degrees));
+    Controller1.Screen.setCursor(4,1);
     Controller1.Screen.print("LeftFrontMotor: %f",leftFrontMotor.position(degrees));
     // Allow other tasks to run
     this_thread::sleep_for(50);
@@ -394,11 +396,8 @@ void skillsAuton() {
   // max shooting speed
   cataMotor.setVelocity(100,percent);
 
-  // drop intake
-  intakeMotor.spinFor(100,degrees);
-
   // go forward, turn to position bar
-//  driveForward(200,50); UNCOMMENT IN REAL CODE (((((((((((((99(((((((((())))))))))))))))))))))
+  //  driveForward(200,50); UNCOMMENT IN REAL CODE (((((((((((((99(((((((((())))))))))))))))))))))
 
   wait(0.5, seconds);
 
@@ -479,11 +478,12 @@ void selectAuton() {
   int y = Brain.Screen.yPosition();
   bool autonSelected = false;
 
-  // go button clicked
+  // if auton not yet selected
   if (autonSelected == false) {
+    // go button clicked (auton selected)
     if (x >= 320 && x <= 420 && y >= 50 && y <= 150) {
       autonSelected = true;
-      Brain.Screen.printAt(1, 200, "Auton Chosen =  %d                             ", AutonSelected);
+      Brain.Screen.printAt(1, 200, "Auton Selected =  %d                             ", AutonSelected);
       Brain.Screen.clearScreen();
 
       Brain.Screen.printAt(1,40, "--------4610M--------                              ");
@@ -523,7 +523,7 @@ void selectAuton() {
       if (AutonSelected > AutonMax) {
         AutonSelected = AutonMin; 
       }  
-  }
+    }
   }  
   
   
@@ -563,7 +563,6 @@ void pre_auton(void) {
   // Example: clearing encoders, setting servo positions, ...
 
   initialize();
-  wait (3, sec);
   drawAutonSelector2();
 
   Brain.Screen.pressed(selectAuton);
@@ -584,6 +583,13 @@ void autonomous(void) {
   // ..........................................................................
   // Insert autonomous user code here.
   // ..........................................................................
+
+  // drop intake down
+  intakeMotor.spin(reverse);
+  wait(0.5,seconds);
+  intakeMotor.stop();
+
+  // pick between auton programs
   switch (AutonSelected) {
     case 0:
       preloadAuton();
@@ -642,8 +648,12 @@ int main() {
 
   // Run the pre-autonomous function.
   pre_auton();
+
+
   //Skills, testing the turns that I (calv) updated
   skillsAuton();
+
+  
   // Prevent main from exiting with an infinite loop.
   
   while (true) {
