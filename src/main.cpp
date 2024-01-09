@@ -22,14 +22,14 @@ brain  Brain;
 controller Controller1 = controller(primary);
 digital_out rightWing = digital_out(Brain.ThreeWirePort.A);
 digital_out leftWing = digital_out(Brain.ThreeWirePort.B);
-motor leftFrontMotor = motor(PORT19, ratio6_1, false);
-motor leftBackMotor = motor(PORT18, ratio6_1, false);
-motor rightFrontMotor = motor(PORT11, ratio6_1, true);
-motor rightBackMotor = motor(PORT14, ratio6_1, true);
-motor leftTopMotor = motor(PORT12, ratio6_1, true);
-motor rightTopMotor = motor(PORT15, ratio6_1, false);
-motor intakeMotor = motor(PORT20, ratio6_1, false);
-motor cataMotor = motor(PORT16, ratio36_1, false);
+motor leftFrontMotor = motor(PORT11, ratio6_1, false);
+motor leftBackMotor = motor(PORT18, ratio6_1, false); 
+motor rightFrontMotor = motor(PORT19, ratio6_1, true);
+motor rightBackMotor = motor(PORT14, ratio6_1, true); 
+motor leftTopMotor = motor(PORT12, ratio6_1, false);  
+motor rightTopMotor = motor(PORT15, ratio6_1, true);  
+motor intakeMotor = motor(PORT20, ratio6_1, false); 
+motor cataMotor = motor(PORT16, ratio36_1, false);  
 inertial InertialA = inertial(PORT8);
 
 // VEXcode generated functions
@@ -170,84 +170,204 @@ void turnRight(int target, int driveSpeed=50) {
 
     driveStop();
 }
-void turnLeftFUpdated(int target) {   
+void turnLeftFUpdated(int target) {  
+  double fast_speed = 50;
+  double slow_speed = 25;
+  int speed = 50;
+
+  InertialA.resetRotation();
+  wait(.25, sec); //Let em' get used to stuff
+
+  while(InertialA.rotation(degrees) > -target * .3) { //negative target because turning left is negative while turning right is positive
+      speed = fast_speed; 
+
+      leftTopMotor.spin(fwd, speed, pct);
+      rightTopMotor.spin(reverse, speed, pct);
+      leftFrontMotor.spin(reverse, speed, pct);
+      rightFrontMotor.spin(fwd, speed, pct);
+      leftBackMotor.spin(reverse, speed, pct);
+      rightBackMotor.spin(fwd, speed, pct);
+   }
+
+  while(InertialA.rotation(degrees) > -target) {
+      speed = slow_speed; 
+
+      leftTopMotor.spin(fwd, speed, pct);
+      rightTopMotor.spin(reverse, speed, pct);
+      leftFrontMotor.spin(reverse, speed, pct);
+      rightFrontMotor.spin(fwd, speed, pct); 
+      leftBackMotor.spin(reverse, speed, pct);
+      rightBackMotor.spin(fwd, speed, pct);
+   }
+   
+
+   
+
+  driveStop();
     
-    InertialA.resetRotation();
-    wait(.25, sec); //Let em' get used to stuff 
-    
-    double change_point = 45; 
-    double fast_speed = 50;
-    double slow_speed = 5;
-
-    while(InertialA.rotation(degrees) > target/3) {
-        int speed = fast_speed;  
-
-        /*leftTopMotor.spin(fwd, speed, pct);
-        rightTopMotor.spin(reverse, speed, pct);
-        leftFrontMotor.spin(reverse, speed, pct);
-        rightFrontMotor.spin(fwd, speed, pct); */
-        leftBackMotor.spin(reverse, speed, pct);
-        rightBackMotor.spin(fwd, speed, pct);
-    }
-
-    while(InertialA.rotation(degrees) < target/3) {
-        int speed = slow_speed;  
-
-      /*  leftTopMotor.spin(fwd, speed, pct);
-        rightTopMotor.spin(reverse, speed, pct);
-        leftFrontMotor.spin(reverse, speed, pct);
-        rightFrontMotor.spin(fwd, speed, pct); */
-        leftBackMotor.spin(reverse, speed, pct);
-        rightBackMotor.spin(fwd, speed, pct);
-    }
-
-
-    /*leftTopMotor.stop();
-    rightTopMotor.stop();
-    leftFrontMotor.stop();
-    rightFrontMotor.stop(); */
-    leftBackMotor.stop();
-    rightBackMotor.stop();  
 }
 
-void turnRightF(int target) {   
-    
-    InertialA.resetRotation();
-    wait(.25, sec); //Let 'em settle...
-    
-    double change_point = 45; 
-    double fast_speed = 50;
-    double slow_speed = 5;
+void turnRightF(int targetright) {  
+    double fast_speedright = 50;
+    double slow_speedright = 25;
     int speed = 50;
-    while (InertialA.rotation(degrees) < target/2) { 
-        speed = fast_speed;  
 
+    InertialA.resetRotation();
+    wait(.25, sec); 
+    
+    while (InertialA.rotation(degrees) < targetright * .3) {
+      speed = fast_speedright; 
+      leftTopMotor.spin(reverse, speed, pct);
+      rightTopMotor.spin(fwd, speed, pct);
+      leftFrontMotor.spin(fwd, speed, pct);   
+      rightFrontMotor.spin(reverse, speed, pct); 
+      leftBackMotor.spin(fwd, speed, pct);
+      rightBackMotor.spin(reverse, speed, pct);
+   }
 
-        /*leftTopMotor.spin(reverse, speed, pct);
-        rightTopMotor.spin(fwd, speed, pct);
-        leftFrontMotor.spin(fwd, speed, pct);    
-        rightFrontMotor.spin(reverse, speed, pct); */
-        leftBackMotor.spin(fwd, speed, pct);
-        rightBackMotor.spin(fwd, speed, pct);
-    }
-
-    while (InertialA.rotation(degrees) > target/2 ) { 
-        speed = slow_speed;  
-
-      /*  leftTopMotor.spin(reverse, speed, pct);
-        rightTopMotor.spin(fwd, speed, pct);
-        leftFrontMotor.spin(fwd, speed, pct);
-        rightFrontMotor.spin(reverse, speed, pct); */ 
-        leftBackMotor.spin(fwd, speed, pct);
-        rightBackMotor.spin(fwd, speed, pct); 
-    }
-    /*leftTopMotor.stop();
-    rightTopMotor.stop();
-    leftFrontMotor.stop();
-    rightFrontMotor.stop(); */
-    leftBackMotor.stop();
-    rightBackMotor.stop();
+   while (InertialA.rotation(degrees) < targetright ) {
+      speed = slow_speedright; 
+      leftTopMotor.spin(reverse, speed, pct);
+      rightTopMotor.spin(fwd, speed, pct);
+      leftFrontMotor.spin(fwd, speed, pct);
+      rightFrontMotor.spin(reverse, speed, pct);
+      leftBackMotor.spin(fwd, speed, pct);
+      rightBackMotor.spin(reverse, speed, pct);
+   }
+   
+  driveStop();
+   
 }
+
+void kPTurnTest(float target) {
+  float accuracy=2.0; //how accurate to make the turn in degrees
+  float error=target-InertialA.heading(degrees);
+  float kp=5.0;
+  float speed=kp*error;
+  InertialA.resetHeading();  //reset Gyro to zero degrees
+  while(fabs(error)>=accuracy) {
+    speed=kp*error;
+    leftTopMotor.spin(reverse, -speed, pct);
+    rightTopMotor.spin(fwd, speed, pct);
+    leftFrontMotor.spin(fwd, speed, pct);
+    rightFrontMotor.spin(reverse, -speed, pct);
+    leftBackMotor.spin(fwd, speed, pct);
+    rightBackMotor.spin(fwd, -speed, pct); 
+    error=target-InertialA.heading(degrees);  //calculate error
+  }
+  driveStop();
+}
+int AutonSelected = 0;
+int AutonMin = 0;
+int AutonMax = 3;
+
+void drawAutonSelector2() {
+  // clear brain screen and print text
+  Brain.Screen.clearScreen();
+  Brain.Screen.printAt(1, 40, "Select Auton then Press Go");
+  Brain.Screen.printAt(1, 200, "Auton Selected =  %s   ", AutonSelected);
+
+  //set color presets for shapes and text below
+  Brain.Screen.setFillColor(black);
+  Brain.Screen.setPenColor(red);
+  
+  // draw prev. button
+  Brain.Screen.drawRectangle(20, 50, 100, 100);
+  Brain.Screen.setPenColor(white);
+  Brain.Screen.printAt(25, 75, "Prev");
+
+  // draw next button
+  Brain.Screen.setPenColor(red);
+  Brain.Screen.drawRectangle(170, 50, 100, 100);
+  Brain.Screen.setPenColor(white);
+  Brain.Screen.printAt(175, 75, "Next");
+
+  // draw GO button
+  Brain.Screen.setFillColor(green);
+  Brain.Screen.setPenColor(green);
+  Brain.Screen.drawRectangle(320, 50, 100, 100);
+  Brain.Screen.setPenColor("white");
+  Brain.Screen.printAt(325, 75, "GO!");
+
+  // reset shape fill color to black
+  Brain.Screen.setFillColor("black");
+}
+
+
+void selectAuton() {
+  // get click position
+  int x = Brain.Screen.xPosition(); 
+  int y = Brain.Screen.yPosition();
+  bool autonSelected = false;
+
+  // if auton not yet selected
+  if (autonSelected == false) {
+    // go button clicked (auton selected)
+    if (x >= 320 && x <= 420 && y >= 50 && y <= 150) {
+      autonSelected = true;
+      Brain.Screen.printAt(1, 200, "Auton Selected =  %d                             ", AutonSelected);
+      Brain.Screen.clearScreen();
+
+      Brain.Screen.printAt(1,40, "--------4610M--------                              ");
+    
+
+      Brain.Screen.printAt(1, 200, "Auton Selected =  %d   ", AutonSelected);
+
+      switch (AutonSelected)  {
+        case 0:
+          Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal                              ");
+          break;
+        case 1:
+          Brain.Screen.printAt(1, 225, "Auton Description: Offensive Auton: Score ________                              ");
+          break;
+        case 2:
+          Brain.Screen.printAt(1, 225, "Auton Description: Defensive Auton: Score ________                              ");
+          break;
+        case 3:
+          Brain.Screen.printAt(1, 225, "Auton Description: Skills auton                              ");
+          break;
+        default:
+          Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal                              ");
+      }
+    }
+
+    // prev button clicked
+    else if (x >= 20 && x <= 120 && y >= 50 && y <= 150) {
+      AutonSelected--;
+      if (AutonSelected < AutonMin) {
+        AutonSelected = AutonMax; 
+      }
+    }
+    // next button clicked
+    else if (x >= 170 && x <= 270 && y >= 50 && y <= 150) {
+      AutonSelected++;
+      if (AutonSelected > AutonMax) {
+        AutonSelected = AutonMin; 
+      }  
+    }
+  }  
+  
+  
+  //print description of auton selected
+  Brain.Screen.printAt(1, 200, "Auton Selected =  %d   ", AutonSelected);
+  switch (AutonSelected)  {
+    case 0:
+      Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal               ");
+      break;
+    case 1:
+      Brain.Screen.printAt(1, 225, "Auton Description: Offensive Auton: Score ________                      ");
+      break;
+    case 2:
+      Brain.Screen.printAt(1, 225, "Auton Description: Defensive Auton: Score ________                          ");
+      break;
+    case 3:
+      Brain.Screen.printAt(1, 225, "Auton Description: Skills auton                                                 ");
+      break;
+    default:
+      Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal                           ");
+  }
+}
+
 void controllerDisplay(){
   while(true){
     Controller1.Screen.clearScreen();
@@ -263,12 +383,7 @@ void controllerDisplay(){
     this_thread::sleep_for(50);
   }
 }
-void inertialBrainUpdate() {
-  while(true) {
-    Brain.Screen.printAt(1,120, "Inertial Heading: %f",InertialA.heading(degrees));
-    this_thread::sleep_for(50);
-  }
-}
+
 void initialize() {
     leftWing.set(false);
     rightWing.set(false);
@@ -397,7 +512,8 @@ void skillsAuton() {
   cataMotor.setVelocity(100,percent);
 
   // go forward, turn to position bar
-  //  driveForward(200,50); UNCOMMENT IN REAL CODE (((((((((((((99(((((((((())))))))))))))))))))))
+  driveForward(200,50); 
+
 
   wait(0.5, seconds);
 
@@ -405,26 +521,26 @@ void skillsAuton() {
   turnRightF(90);
 
   wait(1,seconds);
-/*
+
   leftBackMotor.stop();
-  leftFrontMotor.stop(); UNCOMMENT IN REAL CODE (((((((((((((((((((((((())))))))))))))))))))))))
+  leftFrontMotor.stop(); 
 
   // go next to bar
   driveForward(100, 50);
 
   wait(1,seconds);
-*/
+
   // turn left while touching bar (to straighten up)
 
   turnLeftFUpdated(90);
 
   wait(1.5,seconds);
-/*
+  
   leftBackMotor.stop();
   leftFrontMotor.stop();
   
-  wait(1, seconds); UNCOMMENT IN REAL CODE ((((((((((((((((((()))))))))))))))))))
-
+  wait(1, seconds); 
+/*
   // shoot for 40 seconds
 
   cataMotor.spin(reverse);
@@ -435,117 +551,6 @@ void skillsAuton() {
 */
 }
 
-int AutonSelected = 0;
-int AutonMin = 0;
-int AutonMax = 3;
-
-void drawAutonSelector2() {
-  // clear brain screen and print text
-  Brain.Screen.clearScreen();
-  Brain.Screen.printAt(1, 40, "Select Auton then Press Go");
-  Brain.Screen.printAt(1, 200, "Auton Selected =  %s   ", AutonSelected);
-
-  //set color presets for shapes and text below
-  Brain.Screen.setFillColor(black);
-  Brain.Screen.setPenColor(red);
-  
-  // draw prev. button
-  Brain.Screen.drawRectangle(20, 50, 100, 100);
-  Brain.Screen.setPenColor(white);
-  Brain.Screen.printAt(25, 75, "Prev");
-
-  // draw next button
-  Brain.Screen.setPenColor(red);
-  Brain.Screen.drawRectangle(170, 50, 100, 100);
-  Brain.Screen.setPenColor(white);
-  Brain.Screen.printAt(175, 75, "Next");
-
-  // draw GO button
-  Brain.Screen.setFillColor(green);
-  Brain.Screen.setPenColor(green);
-  Brain.Screen.drawRectangle(320, 50, 100, 100);
-  Brain.Screen.setPenColor("white");
-  Brain.Screen.printAt(325, 75, "GO!");
-
-  // reset shape fill color to black
-  Brain.Screen.setFillColor("black");
-}
-
-
-void selectAuton() {
-  // get click position
-  int x = Brain.Screen.xPosition(); 
-  int y = Brain.Screen.yPosition();
-  bool autonSelected = false;
-
-  // if auton not yet selected
-  if (autonSelected == false) {
-    // go button clicked (auton selected)
-    if (x >= 320 && x <= 420 && y >= 50 && y <= 150) {
-      autonSelected = true;
-      Brain.Screen.printAt(1, 200, "Auton Selected =  %d                             ", AutonSelected);
-      Brain.Screen.clearScreen();
-
-      Brain.Screen.printAt(1,40, "--------4610M--------                              ");
-
-      thread t1(inertialBrainUpdate);
-
-      Brain.Screen.printAt(1, 200, "Auton Selected =  %d   ", AutonSelected);
-
-      switch (AutonSelected)  {
-        case 0:
-          Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal                              ");
-          break;
-        case 1:
-          Brain.Screen.printAt(1, 225, "Auton Description: Offensive Auton: Score ________                              ");
-          break;
-        case 2:
-          Brain.Screen.printAt(1, 225, "Auton Description: Defensive Auton: Score ________                              ");
-          break;
-        case 3:
-          Brain.Screen.printAt(1, 225, "Auton Description: Skills auton                              ");
-          break;
-        default:
-          Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal                              ");
-      }
-    }
-
-    // prev button clicked
-    else if (x >= 20 && x <= 120 && y >= 50 && y <= 150) {
-      AutonSelected--;
-      if (AutonSelected < AutonMin) {
-        AutonSelected = AutonMax; 
-      }
-    }
-    // next button clicked
-    else if (x >= 170 && x <= 270 && y >= 50 && y <= 150) {
-      AutonSelected++;
-      if (AutonSelected > AutonMax) {
-        AutonSelected = AutonMin; 
-      }  
-    }
-  }  
-  
-  
-  //print description of auton selected
-  Brain.Screen.printAt(1, 200, "Auton Selected =  %d   ", AutonSelected);
-  switch (AutonSelected)  {
-    case 0:
-      Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal               ");
-      break;
-    case 1:
-      Brain.Screen.printAt(1, 225, "Auton Description: Offensive Auton: Score ________                      ");
-      break;
-    case 2:
-      Brain.Screen.printAt(1, 225, "Auton Description: Defensive Auton: Score ________                          ");
-      break;
-    case 3:
-      Brain.Screen.printAt(1, 225, "Auton Description: Skills auton                                                 ");
-      break;
-    default:
-      Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal                           ");
-  }
-}
 
 /*---------------------------------------------------------------------------*/
 /*                          Pre-Autonomous Functions                         */
