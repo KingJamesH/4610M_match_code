@@ -130,7 +130,7 @@ void toggleWings () {
 
 bool hang_released = true;
 
-void hangWing() {
+void hangWingFunc() {
   if(hang_released) {
     if(Controller1.ButtonX.pressing()) {
       if (hangWing.value() == 0) {
@@ -176,7 +176,7 @@ void driveForward(double distance, double speed=70) {
         leftBackMotor.spin(fwd, speed, pct);
         rightBackMotor.spin(fwd, speed, pct);
         leftMiddleMotor.spin(fwd, speed, pct);
-        rightMiddleotor.spin(fwd, speed, pct);
+        rightMiddleMotor.spin(fwd, speed, pct);
     }
 
     driveStop();
@@ -408,7 +408,7 @@ void controllerDisplay(){
 }
 
 void initialize() {
-    vertWing.set(false)
+    vertWing.set(false);
     hangWing.set(false);
     intakeMotor.setStopping(brake);
 
@@ -649,7 +649,7 @@ void usercontrol(void) {
     SplitDrive();
     intake();
     punch();
-    hangWing();
+    hangWingFunc();
     positionPuncher();
 
 
