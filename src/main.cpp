@@ -20,17 +20,17 @@ brain  Brain;
 
 // VEXcode device constructors
 controller Controller1 = controller(primary);
-digital_out rightWing = digital_out(Brain.ThreeWirePort.A);
-digital_out leftWing = digital_out(Brain.ThreeWirePort.B);
-motor leftFrontMotor = motor(PORT11, ratio6_1, false);
+digital_out vertWing = digital_out(Brain.ThreeWirePort.A);
+digital_out hangWing = digital_out(Brain.ThreeWirePort.B);
+motor leftFrontMotor = motor(PORT19, ratio6_1, false);
 motor leftBackMotor = motor(PORT18, ratio6_1, false); 
-motor rightFrontMotor = motor(PORT19, ratio6_1, true);
-motor rightBackMotor = motor(PORT14, ratio6_1, true); 
-motor leftTopMotor = motor(PORT12, ratio6_1, false);  
-motor rightTopMotor = motor(PORT15, ratio6_1, true);  
-motor intakeMotor = motor(PORT20, ratio6_1, false); 
-motor cataMotor = motor(PORT16, ratio36_1, false);  
-inertial InertialA = inertial(PORT8);
+motor rightFrontMotor = motor(PORT1, ratio6_1, true);
+motor rightBackMotor = motor(PORT20, ratio6_1, true); 
+motor leftMiddleMotor = motor(PORT3, ratio6_1, false);  
+motor rightMiddleMotor = motor(PORT10, ratio6_1, true);  
+motor intakeMotor = motor(PORT16, ratio6_1, false); 
+motor punchMotor = motor(PORT11, ratio36_1, true);  
+inertial InertialA = inertial(PORT2);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable
@@ -39,10 +39,10 @@ bool RemoteControlCodeEnabled = true;
 void SplitDrive(){
     leftFrontMotor.spin(reverse,Controller1.Axis3.position()+Controller1.Axis1.position(),pct);
     leftBackMotor.spin(reverse,Controller1.Axis3.position()+Controller1.Axis1.position(),pct);
-    leftTopMotor.spin(reverse,Controller1.Axis3.position()-Controller1.Axis1.position(),pct);
+    leftMiddleMotor.spin(reverse,Controller1.Axis3.position()+Controller1.Axis1.position(),pct);
     rightFrontMotor.spin(reverse,Controller1.Axis3.position()-Controller1.Axis1.position(),pct);
     rightBackMotor.spin(reverse,Controller1.Axis3.position()-Controller1.Axis1.position(),pct);
-    rightTopMotor.spin(reverse,Controller1.Axis3.position()+Controller1.Axis1.position(),pct);
+    rightMiddleMotor.spin(reverse,Controller1.Axis3.position()-Controller1.Axis1.position(),pct);
 }
 
 void setDriveSpeed (int driveSpeed) {
@@ -50,17 +50,17 @@ void setDriveSpeed (int driveSpeed) {
   leftBackMotor.setVelocity(driveSpeed,percent);
   rightFrontMotor.setVelocity(driveSpeed,percent);
   rightBackMotor.setVelocity(driveSpeed,percent);
-  leftTopMotor.setVelocity(driveSpeed,percent);
-  rightTopMotor.setVelocity(driveSpeed,percent);
+  leftMiddleMotor.setVelocity(driveSpeed,percent);
+  rightMiddleMotor.setVelocity(driveSpeed,percent);
 }
 
 void driveStop(){
   leftFrontMotor.stop();
   leftBackMotor.stop();
-  leftTopMotor.stop();
+  leftMiddleMotor.stop();
   rightFrontMotor.stop();
   rightBackMotor.stop();
-  rightTopMotor.stop();
+  rightMiddleMotor.stop();
 }
 void intake() {
   if (Controller1.ButtonR1.pressing()){
@@ -74,33 +74,97 @@ void intake() {
   }
 }
 
-void cata(){
+void punch(){
   if (Controller1.ButtonL2.pressing()){
-    cataMotor.spin(reverse,100,pct);
+    punchMotor.spin(reverse,100,pct);
   }
   else if (Controller1.ButtonL1.pressing()){
-    cataMotor.spin(reverse,100,pct);
+    punchMotor.spin(reverse,100,pct);
   }
   else {
-    cataMotor.stop(hold);
+    punchMotor.stop(hold);
   }
 }
 
-int wingVar = 0;
+bool holdWingsBool = false;
 
-void wings () {
-  if (Controller1.ButtonX.pressing()) {
-    wingVar += 1;
-    wait(20,msec);
+void holdWings () {
+  while(true){
+    wait(50,msec);
+    if(!holdWingsBool) {
+      if(Controller1.ButtonL2.pressing()) {
+        vertWing.set(true);
+        holdWingsBool = true;
+      }
+    }
+    if(!Controller1.ButtonL2.pressing()){
+      vertWing.set(false);
+      holdWingsBool = false;
+    }
+  } 
+}
+
+bool B_released = true;
+
+void toggleWings () {
+  while(true){
+    wait(50,msec);
+    if(B_released) {
+      if(Controller1.ButtonB.pressing()) {
+        if (vertWing.value() == 0) {
+          vertWing.set(true);
+        }
+        else {
+          vertWing.set(false);
+        }
+        
+        B_released = false;
+      }
+    }
+    if(!Controller1.ButtonB.pressing()){
+      B_released = true;
+    }
+  } 
+}
+
+
+bool hang_released = true;
+
+void hangWing() {
+  if(hang_released) {
+    if(Controller1.ButtonX.pressing()) {
+      if (hangWing.value() == 0) {
+        hangWing.set(true);
+      }
+      else {
+        hangWing.set(false);
+      }
+      
+      hang_released = false;
+    }
   }
-  if (wingVar%2 == 1) {
-    leftWing.set(true);
-    rightWing.set(true);
+  if(!Controller1.ButtonX.pressing()){
+    hang_released = true;
   }
-  else {
-    leftWing.set(false);
-    rightWing.set(false);
+
+}
+
+bool A_released = true;
+
+void positionPuncher() {
+  if(A_released) {
+    if(Controller1.ButtonX.pressing()) {
+      punchMotor.spin(reverse);
+      wait(0.25,seconds); // FIX TO WHATEVER IT SHOULD BE
+      punchMotor.stop();
+      
+      A_released = false;
+    }
   }
+  if(!Controller1.ButtonX.pressing()){
+    A_released = true;
+  }
+
 }
 
 void driveForward(double distance, double speed=70) {   
@@ -111,8 +175,8 @@ void driveForward(double distance, double speed=70) {
         rightFrontMotor.spin(fwd, speed, pct);
         leftBackMotor.spin(fwd, speed, pct);
         rightBackMotor.spin(fwd, speed, pct);
-        leftTopMotor.spin(fwd, speed, pct);
-        rightTopMotor.spin(fwd, speed, pct);
+        leftMiddleMotor.spin(fwd, speed, pct);
+        rightMiddleotor.spin(fwd, speed, pct);
     }
 
     driveStop();
@@ -126,50 +190,13 @@ void driveReverse(double distance, double speed=70) {
         rightFrontMotor.spin(reverse, speed, pct);
         leftBackMotor.spin(reverse, speed, pct);
         rightBackMotor.spin(reverse, speed, pct);
-        leftTopMotor.spin(reverse, speed, pct);
-        rightTopMotor.spin(reverse, speed, pct);
+        leftMiddleMotor.spin(reverse, speed, pct);
+        rightMiddleMotor.spin(reverse, speed, pct);
     }
 
     driveStop();
 }
 
-void turnLeft(int target) {   
-    InertialA.resetRotation();
-    wait(.2, sec); 
-    
-    while(InertialA.rotation(degrees) > -target) {
-        int speed = 5;  
-
-        leftFrontMotor.spin(reverse, speed, pct);
-        rightFrontMotor.spin(fwd, speed, pct);
-        leftBackMotor.spin(reverse, speed, pct);
-        rightBackMotor.spin(fwd, speed, pct);
-        leftTopMotor.spin(reverse, speed, pct);
-        rightTopMotor.spin(fwd, speed, pct);
-        wait(10,msec);
-    }
-
-    driveStop();
-}
-
-void turnRight(int target, int driveSpeed=50) {   
-    InertialA.resetRotation();
-    wait(.2, sec); 
-    
-    while(InertialA.rotation(degrees) < target) {
-        int speed = driveSpeed;  
-
-        leftFrontMotor.spin(fwd, speed, pct);
-        rightFrontMotor.spin(reverse, speed, pct);
-        leftBackMotor.spin(fwd, speed, pct);
-        rightBackMotor.spin(reverse, speed, pct);
-        leftTopMotor.spin(fwd, speed, pct);
-        rightTopMotor.spin(reverse, speed, pct);
-        wait(10,msec);
-    }
-
-    driveStop();
-}
 void turnLeftFUpdated(int target) {  
   double fast_speed = 50;
   double slow_speed = 25;
@@ -181,8 +208,8 @@ void turnLeftFUpdated(int target) {
   while(InertialA.rotation(degrees) > -target * .3) { //negative target because turning left is negative while turning right is positive
       speed = fast_speed; 
 
-      leftTopMotor.spin(fwd, speed, pct);
-      rightTopMotor.spin(reverse, speed, pct);
+      leftMiddleMotor.spin(fwd, speed, pct);
+      rightMiddleMotor.spin(reverse, speed, pct);
       leftFrontMotor.spin(reverse, speed, pct);
       rightFrontMotor.spin(fwd, speed, pct);
       leftBackMotor.spin(reverse, speed, pct);
@@ -192,8 +219,8 @@ void turnLeftFUpdated(int target) {
   while(InertialA.rotation(degrees) > -target) {
       speed = slow_speed; 
 
-      leftTopMotor.spin(fwd, speed, pct);
-      rightTopMotor.spin(reverse, speed, pct);
+      leftMiddleMotor.spin(fwd, speed, pct);
+      rightMiddleMotor.spin(reverse, speed, pct);
       leftFrontMotor.spin(reverse, speed, pct);
       rightFrontMotor.spin(fwd, speed, pct); 
       leftBackMotor.spin(reverse, speed, pct);
@@ -217,8 +244,8 @@ void turnRightF(int targetright) {
     
     while (InertialA.rotation(degrees) < targetright * .3) {
       speed = fast_speedright; 
-      leftTopMotor.spin(reverse, speed, pct);
-      rightTopMotor.spin(fwd, speed, pct);
+      leftMiddleMotor.spin(reverse, speed, pct);
+      rightMiddleMotor.spin(fwd, speed, pct);
       leftFrontMotor.spin(fwd, speed, pct);   
       rightFrontMotor.spin(reverse, speed, pct); 
       leftBackMotor.spin(fwd, speed, pct);
@@ -227,8 +254,8 @@ void turnRightF(int targetright) {
 
    while (InertialA.rotation(degrees) < targetright ) {
       speed = slow_speedright; 
-      leftTopMotor.spin(reverse, speed, pct);
-      rightTopMotor.spin(fwd, speed, pct);
+      leftMiddleMotor.spin(reverse, speed, pct);
+      rightMiddleMotor.spin(fwd, speed, pct);
       leftFrontMotor.spin(fwd, speed, pct);
       rightFrontMotor.spin(reverse, speed, pct);
       leftBackMotor.spin(fwd, speed, pct);
@@ -247,8 +274,8 @@ void kPTurnTest(float target) {
   InertialA.resetHeading();  //reset Gyro to zero degrees
   while(fabs(error)>=accuracy) {
     speed=kp*error;
-    leftTopMotor.spin(reverse, -speed, pct);
-    rightTopMotor.spin(fwd, speed, pct);
+    leftMiddleMotor.spin(reverse, -speed, pct);
+    rightMiddleMotor.spin(fwd, speed, pct);
     leftFrontMotor.spin(fwd, speed, pct);
     rightFrontMotor.spin(reverse, -speed, pct);
     leftBackMotor.spin(fwd, speed, pct);
@@ -259,7 +286,7 @@ void kPTurnTest(float target) {
 }
 int AutonSelected = 0;
 int AutonMin = 0;
-int AutonMax = 3;
+int AutonMax = 2;
 
 void drawAutonSelector2() {
   // clear brain screen and print text
@@ -323,11 +350,9 @@ void selectAuton() {
         case 2:
           Brain.Screen.printAt(1, 225, "Auton Description: Defensive Auton: Score ________                              ");
           break;
-        case 3:
-          Brain.Screen.printAt(1, 225, "Auton Description: Skills auton                              ");
-          break;
         default:
           Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal                              ");
+          break;
       }
     }
 
@@ -360,11 +385,9 @@ void selectAuton() {
     case 2:
       Brain.Screen.printAt(1, 225, "Auton Description: Defensive Auton: Score ________                          ");
       break;
-    case 3:
-      Brain.Screen.printAt(1, 225, "Auton Description: Skills auton                                                 ");
-      break;
     default:
       Brain.Screen.printAt(1, 225, "Auton Description: Score JUST preload into goal                           ");
+      break;
   }
 }
 
@@ -385,16 +408,16 @@ void controllerDisplay(){
 }
 
 void initialize() {
-    leftWing.set(false);
-    rightWing.set(false);
+    vertWing.set(false)
+    hangWing.set(false);
     intakeMotor.setStopping(brake);
 
     leftFrontMotor.setStopping(brake);
     leftBackMotor.setStopping(brake);
-    leftTopMotor.setStopping(brake);
+    leftMiddleMotor.setStopping(brake);
     rightFrontMotor.setStopping(brake);
     rightBackMotor.setStopping(brake);
-    rightTopMotor.setStopping(brake);
+    rightMiddleMotor.setStopping(brake);
 
     Controller1.Screen.clearScreen();
     Controller1.Screen.setCursor(1,1);
@@ -431,23 +454,18 @@ void preloadAuton(){
   driveReverse(200);
 
   // at the end of auton
-  leftFrontMotor.setStopping(coast);
-  leftBackMotor.setStopping(coast);
-  leftTopMotor.setStopping(coast);
-  rightFrontMotor.setStopping(coast);
-  rightBackMotor.setStopping(coast);
-  rightTopMotor.setStopping(coast);
+  
 }
 
 void defensiveAuton(){
   // // drive into matchload bar
   // driveForward(150);
-  // leftWing.set(true);
+  // vertWing.set(true);
   // wait(0.2,seconds);
   // // get triball out of matchload zone
   // turnRight(180);
   // wait(0.2,seconds);
-  // leftWing.set(false);
+  // vertWing.set(false);
   // turnLeft(60);
   // // push preload into goal
   // driveForward(150);
@@ -462,13 +480,24 @@ void defensiveAuton(){
   // turnRight(45);
   // driveForward(200);
 
+  //NEW DEFENSE CODE
+  driveForward(500);
+  driveReverse(350);
+  //Wing function or whatever to get triball out of corner
+  turnLeftFUpdated(45);
+  driveReverse(200);
+  turnRightF(45);
+  driveForward(1000);
+  turnRightF(90);
+  driveForward(300);
+
   // at the end of auton
   leftFrontMotor.setStopping(coast);
   leftBackMotor.setStopping(coast);
-  leftTopMotor.setStopping(coast);
+  leftMiddleMotor.setStopping(coast);
   rightFrontMotor.setStopping(coast);
   rightBackMotor.setStopping(coast);
-  rightTopMotor.setStopping(coast);
+  rightMiddleMotor.setStopping(coast);
 }
 void offensiveAuton() {
   // driveForward(500);
@@ -494,61 +523,36 @@ void offensiveAuton() {
   // driveForward(200);
   // driveReverse(300);
 
+/*
+  driveForward(100);
+  turnRightF(45);
+  driveForward(200);
+  turnrightF(150);
+  driveForward(400);
+  turnleftFUpdated(60);
+  driveForward(200);
+*/
+
+
+  driveForward(400);
+  turnRightF(90);
+  intakeMotor.spin(forward);
+  turnRightF(160);
+  driveForward(1000);
+  intakeMotor.spin(reverse);
+  turnRightF(110);
+  turnRightF(90);
+  vertWing.set(true);
+  driveForward(1000);
+  intakeMotor.spin(forward);
+
   // at the end of auton
   leftFrontMotor.setStopping(coast);
   leftBackMotor.setStopping(coast);
-  leftTopMotor.setStopping(coast);
+  leftMiddleMotor.setStopping(coast);
   rightFrontMotor.setStopping(coast);
   rightBackMotor.setStopping(coast);
-  rightTopMotor.setStopping(coast);
-}
-
-void skillsAuton() {
-
-  // 50% drive speed
-  setDriveSpeed(50);
-  
-  // max shooting speed
-  cataMotor.setVelocity(100,percent);
-
-  // go forward, turn to position bar
-  driveForward(200,50); 
-
-
-  wait(0.5, seconds);
-
-  // turn right for one second
-  turnRightF(90);
-
-  wait(1,seconds);
-
-  leftBackMotor.stop();
-  leftFrontMotor.stop(); 
-
-  // go next to bar
-  driveForward(100, 50);
-
-  wait(1,seconds);
-
-  // turn left while touching bar (to straighten up)
-
-  turnLeftFUpdated(90);
-
-  wait(1.5,seconds);
-  
-  leftBackMotor.stop();
-  leftFrontMotor.stop();
-  
-  wait(1, seconds); 
-/*
-  // shoot for 40 seconds
-
-  cataMotor.spin(reverse);
-
-  wait(40,seconds);
-
-  cataMotor.stop();
-*/
+  rightMiddleMotor.setStopping(coast);
 }
 
 
@@ -605,9 +609,7 @@ void autonomous(void) {
     case 2:
       defensiveAuton();
       break;
-    case 3:
-      skillsAuton();
-      break;
+
   }
 }
 
@@ -622,8 +624,19 @@ void autonomous(void) {
 /*---------------------------------------------------------------------------*/
 
 void usercontrol(void) {
+  leftFrontMotor.setStopping(coast);
+  leftBackMotor.setStopping(coast);
+  leftMiddleMotor.setStopping(coast);
+  rightFrontMotor.setStopping(coast);
+  rightBackMotor.setStopping(coast);
+  rightMiddleMotor.setStopping(coast);
   // User control code here, inside the loop
+
+  // start threads
+  thread a(toggleWings);
+  thread b(holdWings);
   while (1) {
+    
     
     // This is the main execution loop for the user control program.
     // Each time through the loop your program should update motor + servo
@@ -635,8 +648,10 @@ void usercontrol(void) {
     // ........................................................................
     SplitDrive();
     intake();
-    cata();
-    wings();
+    punch();
+    hangWing();
+    positionPuncher();
+
 
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
@@ -653,10 +668,6 @@ int main() {
 
   // Run the pre-autonomous function.
   pre_auton();
-
-
-  //Skills, testing the turns that I (calv) updated
-  skillsAuton();
 
   
   // Prevent main from exiting with an infinite loop.
