@@ -104,13 +104,13 @@ void holdWings () {
   } 
 }
 
-bool B_released = true;
+bool toggle_released = true;
 
 void toggleWings () {
   while(true){
     wait(50,msec);
-    if(B_released) {
-      if(Controller1.ButtonB.pressing()) {
+    if(toggle_released) {
+      if(Controller1.ButtonX.pressing()) {
         if (vertWing.value() == 0) {
           vertWing.set(true);
         }
@@ -118,11 +118,11 @@ void toggleWings () {
           vertWing.set(false);
         }
         
-        B_released = false;
+        toggle_released = false;
       }
     }
-    if(!Controller1.ButtonB.pressing()){
-      B_released = true;
+    if(!Controller1.ButtonX.pressing()){
+      toggle_released = true;
     }
   } 
 }
@@ -132,7 +132,7 @@ bool hang_released = true;
 
 void hangWingFunc() {
   if(hang_released) {
-    if(Controller1.ButtonX.pressing()) {
+    if(Controller1.ButtonB.pressing()) {
       if (hangWing.value() == 0) {
         hangWing.set(true);
       }
@@ -143,7 +143,7 @@ void hangWingFunc() {
       hang_released = false;
     }
   }
-  if(!Controller1.ButtonX.pressing()){
+  if(!Controller1.ButtonB.pressing()){
     hang_released = true;
   }
 
